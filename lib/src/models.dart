@@ -376,8 +376,12 @@ sealed class Task extends Request {
     if (this is MultiUploadTask && withFilename == null) {
       return '';
     }
-    final Directory baseDir = await switch (baseDirectory) {
-      BaseDirectory.applicationDocuments => getApplicationDocumentsDirectory(),
+    final Directory? baseDir = await switch (baseDirectory) {
+      BaseDirectory.applicationDocuments => Future.value(
+          Directory(
+            path.join((await getExternalStorageDirectory())!.path, ''),
+          ),
+        ),
       BaseDirectory.temporary => getTemporaryDirectory(),
       BaseDirectory.applicationSupport => getApplicationSupportDirectory(),
       BaseDirectory.applicationLibrary
@@ -386,7 +390,7 @@ sealed class Task extends Request {
       BaseDirectory.applicationLibrary => Future.value(Directory(
           path.join((await getApplicationSupportDirectory()).path, 'Library')))
     };
-    return path.join(baseDir.path, directory, withFilename ?? filename);
+    return path.join(baseDir!.path, directory, withFilename ?? filename);
   }
 
   /// Returns a copy of the [Task] with optional changes to specific fields
